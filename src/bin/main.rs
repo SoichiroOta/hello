@@ -1,12 +1,12 @@
 extern crate hello;
 use hello::ThreadPool;
 
+use std::fs::File;
+use std::io::prelude::*;
+use std::net::TcpListener;
+use std::net::TcpStream;
 use std::thread;
 use std::time::Duration;
-use std::io::prelude::*;
-use std::net::TcpStream;
-use std::net::TcpListener;
-use std::fs::File;
 //struct ThreadPool;
 //impl ThreadPool {
 //    fn new(size: u32) -> ThreadPool { ThreadPool }

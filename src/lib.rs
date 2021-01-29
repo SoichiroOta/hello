@@ -1,7 +1,7 @@
-use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::thread;
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
@@ -27,19 +27,19 @@ type Job = Box<FnBox + Send + 'static>;
 
 impl ThreadPool {
     /// 新しいThreadPoolを生成する。
-    /// 
+    ///
     /// sizeがプールのスレッド数です。
-    /// 
+    ///
     /// # パニック
-    /// 
+    ///
     /// sizeが0なら、`new`関数はパニックします。
-    /// 
+    ///
     /// Create a new ThreadPool.ThreadPool
-    /// 
+    ///
     /// The size is the number of threads in the pool.ThreadPool
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// The `new` function will panic if the size is zero.
     pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
@@ -54,15 +54,12 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        ThreadPool {
-            workers,
-            sender,
-        }
+        ThreadPool { workers, sender }
     }
 
     pub fn execute<F>(&self, f: F)
-        where
-            F: FnOnce() + Send + 'static
+    where
+        F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
 
@@ -74,7 +71,7 @@ impl Drop for ThreadPool {
     fn drop(&mut self) {
         println!("Sending terminate message to all workers.");
 
-        for _ in &mut self.workers { 
+        for _ in &mut self.workers {
             self.sender.send(Message::Terminate).unwrap();
         }
 
@@ -83,7 +80,7 @@ impl Drop for ThreadPool {
         for worker in &mut self.workers {
             // ワーカー{}を閉じます
             println!("Shutting down worker {}", worker.id);
-            
+
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap();
             }
@@ -107,7 +104,7 @@ impl Worker {
                         println!("Worker {} got a job; executing.", id);
 
                         job.call_box();
-                    },
+                    }
                     Message::Terminate => {
                         // ワーカー{}は停止するよう指示された
                         println!("Worker {} was told to terminate.", id);
